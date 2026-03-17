@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Citizen Dashboard - Civic Connect</title>
+  <link rel="stylesheet" href="../styles.css">
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <style>
+    /* Citizen Dashboard Specific Styles */
+    .hero-section {
+        background: linear-gradient(135deg, #047857 0%, #10b981 100%);
+        color: white;
+        padding: 3rem 2rem;
+        border-radius: 1rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 2rem;
+    }
+    
+    .hero-title { font-size: 2.5rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .hero-subtitle { font-size: 1.1rem; opacity: 0.9; max-width: 600px; }
+
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 3rem;
+    }
+
+    .stat-card {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 1rem;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 1.25rem;
+        transition: transform 0.3s ease;
+    }
+    .stat-card:hover { transform: translateY(-5px); }
+
+    .stat-icon {
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        flex-shrink: 0;
+    }
+    .icon-impact { background: linear-gradient(135deg, #f59e0b 0%, #fbbf24 100%); }
+    .icon-reports { background: linear-gradient(135deg, #3b82f6 0%, #60a5fa 100%); }
+    .icon-level { background: linear-gradient(135deg, #8b5cf6 0%, #a78bfa 100%); }
+
+    .stat-info { display: flex; flex-direction: column; }
+    .stat-label { color: var(--text-light); font-size: 0.85rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; }
+    .stat-value { font-size: 1.8rem; font-weight: 800; line-height: 1.2; color: var(--text); }
+
+    .complaint-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+        gap: 2rem;
+    }
+
+    .issue-card {
+        background: white;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: var(--shadow);
+        transition: all 0.3s ease;
+        border: 1px solid #e2e8f0;
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    
+    .issue-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        border-color: #cbd5e1;
+    }
+
+    .issue-img-container {
+        position: relative;
+        height: 200px;
+        width: 100%;
+    }
+
+    .issue-img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .issue-badge {
+        position: absolute;
+        top: 1rem;
+        left: 1rem;
+        padding: 0.4rem 0.8rem;
+        border-radius: 2rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .issue-content {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        flex-grow: 1;
+    }
+
+    .issue-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 0.75rem;
+    }
+
+    .issue-title { font-size: 1.25rem; font-weight: 700; color: #1e293b; margin: 0; }
+    .issue-date { font-size: 0.8rem; color: #94a3b8; font-weight: 500; }
+    
+    .issue-desc {
+        color: #475569;
+        font-size: 0.95rem;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+        flex-grow: 1;
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .issue-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid #f1f5f9;
+    }
+
+    .upvote-badge {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: #0ea5e9;
+        font-weight: 600;
+        font-size: 0.9rem;
+        background: #e0f2fe;
+        padding: 0.4rem 0.8rem;
+        border-radius: 2rem;
+    }
+
+    .progress-track {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #10b981;
+    }
+    
+    .btn-report {
+        background: white;
+        color: #047857;
+        font-weight: 700;
+        padding: 1rem 2rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        transition: all 0.2s;
+    }
+    .btn-report:hover { transform: scale(1.05); box-shadow: 0 10px 15px rgba(0,0,0,0.15); }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    function Navbar({ user }) {
+      return (
+        <header style={{ borderBottom: '1px solid #e2e8f0', boxShadow: 'none' }}>
+          <div className="logo" style={{ color: '#047857' }}>
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+            Civic Connect
+          </div>
+          <nav style={{ display: 'flex', gap: '2rem', alignItems: 'center' }}>
+            <a href="dashboard.html" style={{ fontWeight: '700', color: '#047857', textDecoration: 'none', borderBottom: '2px solid #047857', paddingBottom: '0.25rem' }}>My Reports</a>
+            <a href="profile.html" style={{ color: 'var(--text-light)', textDecoration: 'none', fontWeight: '500' }}>Profile</a>
+            <a href="rewards.html" style={{ color: 'var(--text-light)', textDecoration: 'none', fontWeight: '500' }}>Rewards</a>
+            <button onClick={() => { localStorage.clear(); window.location.href = '../landing.html'; }} className="btn btn-outline" style={{ border: '2px solid #e2e8f0', color: '#64748b', padding: '0.5rem 1rem' }}>Logout</button>
+          </nav>
+        </header>
+      );
+    }
+
+    function Dashboard() {
+      const [complaints, setComplaints] = useState([]);
+      const [loading, setLoading] = useState(true);
+      const [user, setUser] = useState(() => JSON.parse(localStorage.getItem('user') || '{}'));
+
+      useEffect(() => {
+        const fetchComplaints = async () => {
+          try {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                window.location.href = 'login.html';
+                return;
+            }
+            const response = await fetch('http://localhost:8000/complaints/my', {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.status === 401) {
+                localStorage.clear();
+                window.location.href = 'login.html';
+                return;
+            }
+            if (response.ok) {
+              const data = await response.json();
+              setComplaints(data);
+            }
+          } catch (err) {
+            console.error(err);
+          } finally {
+            setLoading(false);
+          }
+        };
+        
+        const fetchProfile = async () => {
+          try {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+            const res = await fetch('http://localhost:8000/citizen/profile', {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+              const data = await res.json();
+              setUser(prev => {
+                  const updated = { ...prev, points: data.points, level: data.level };
+                  localStorage.setItem('user', JSON.stringify(updated));
+                  return updated;
+              });
+            }
+          } catch(err) { console.error(err); }
+        };
+
+        fetchComplaints();
+        fetchProfile();
+      }, []);
+
+      const getStatusStyle = (status) => {
+        if (status === 'Pending') return { bg: '#cbd5e1', text: '#334155' };
+        if (status === 'In-Progress') return { bg: '#fef08a', text: '#854d0e' };
+        if (status === 'Resolved') return { bg: '#a7f3d0', text: '#065f46' };
+        return { bg: '#fecaca', text: '#991b1b' };
+      };
+
+      return (
+        <div style={{ background: '#f8fafc', minHeight: '100vh', paddingBottom: '4rem' }}>
+          <Navbar user={user} />
+          
+          <div className="hero-section container">
+             <div>
+                 <h1 className="hero-title">Welcome back, {user.name.split(' ')[0]}! 👋</h1>
+                 <p className="hero-subtitle">You have the power to make your city a better place. Track your active reports below.</p>
+             </div>
+             <a href="report.html" className="btn btn-report" style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', textDecoration: 'none' }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Report New Issue
+             </a>
+          </div>
+
+          <main className="container animate-fade" style={{ paddingTop: '0' }}>
+            <div className="stat-grid">
+                <div className="stat-card">
+                    <div className="stat-icon icon-reports">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    </div>
+                    <div className="stat-info">
+                        <span className="stat-label">Total Reports</span>
+                        <span className="stat-value">{complaints.length}</span>
+                    </div>
+                </div>
+                <div className="stat-card">
+                    <div className="stat-icon icon-impact">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                    </div>
+                    <div className="stat-info">
+                        <span className="stat-label">Impact Points</span>
+                        <span className="stat-value">{user.points || 0}</span>
+                    </div>
+                </div>
+                <div className="stat-card">
+                    <div className="stat-icon icon-level">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                    </div>
+                    <div className="stat-info">
+                        <span className="stat-label">Citizen Level</span>
+                        <span className="stat-value" style={{ fontSize: '1.5rem', color: '#7c3aed' }}>{user.level || 'Bronze'}</span>
+                    </div>
+                </div>
+            </div>
+
+            <h2 style={{ fontSize: '1.5rem', fontWeight: '800', color: '#1e293b', marginBottom: '1.5rem', marginLeft: '0.5rem' }}>Your Tracking Wall</h2>
+
+            {loading ? (
+                <div style={{ textAlign: 'center', padding: '3rem', color: 'var(--text-light)' }}>
+                    <svg className="animate-spin" style={{ margin: '0 auto 1rem auto', animation: 'spin 1s linear infinite' }} width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="2" x2="12" y2="6"></line><line x1="12" y1="18" x2="12" y2="22"></line><line x1="4.93" y1="4.93" x2="7.76" y2="7.76"></line><line x1="16.24" y1="16.24" x2="19.07" y2="19.07"></line><line x1="2" y1="12" x2="6" y2="12"></line><line x1="18" y1="12" x2="22" y2="12"></line><line x1="4.93" y1="19.07" x2="7.76" y2="16.24"></line><line x1="16.24" y1="7.76" x2="19.07" y2="4.93"></line></svg>
+                    Loading your reports...
+                    <style>{`@keyframes spin { 100% { transform: rotate(360deg); } }`}</style>
+                </div>
+            ) : complaints.length === 0 ? (
+              <div className="card" style={{ textAlign: 'center', padding: '4rem', background: 'white', borderRadius: '1rem' }}>
+                <svg style={{ margin: '0 auto 1.5rem auto', color: '#cbd5e1' }} width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                <h3 style={{ marginBottom: '1rem', fontSize: '1.5rem', color: '#334155' }}>Your wall is empty</h3>
+                <p style={{ color: '#64748b', marginBottom: '2rem', maxWidth: '400px', margin: '0 auto 2rem auto' }}>Help improve your city's infrastructure by reporting issues like potholes, broken street lights, or garbage dumps.</p>
+                <a href="report.html" className="btn btn-primary" style={{ background: '#047857' }}>Make an Impact Today</a>
+              </div>
+            ) : (
+              <div className="complaint-grid">
+                {complaints.map(c => {
+                  const sStyle = getStatusStyle(c.status);
+                  return (
+                      <div key={c.id} className="issue-card" onClick={() => window.location.href = `track.html?id=${c.id}`}>
+                        <div className="issue-img-container">
+                            <img src={c.photo_url || 'https://via.placeholder.com/400x200?text=No+Photo'} alt={c.category} className="issue-img" />
+                            <span className="issue-badge" style={{ background: sStyle.bg, color: sStyle.text }}>
+                                {c.status}
+                            </span>
+                        </div>
+                        <div className="issue-content">
+                            <div className="issue-header">
+                                <h3 className="issue-title">{c.category}</h3>
+                                <span className="issue-date">{new Date(c.created_at).toLocaleDateString()}</span>
+                            </div>
+                            <p className="issue-desc">{c.description}</p>
+                            <div className="issue-footer">
+                                <div className="upvote-badge">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M14 9l-2-2-2 2"></path><path d="M12 7v10"></path><circle cx="12" cy="12" r="10"></circle></svg>
+                                    {c.upvotes}
+                                </div>
+                                <div className="progress-track">
+                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                                    Stage {c.current_stage}/7
+                                </div>
+                            </div>
+                        </div>
+                      </div>
+                  );
+                })}
+              </div>
+            )}
+          </main>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<Dashboard />);
+  </script>
+</body>
+</html>

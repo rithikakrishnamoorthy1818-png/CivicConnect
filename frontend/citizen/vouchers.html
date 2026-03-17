@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Vouchers - Civic Connect</title>
+  <link rel="stylesheet" href="../styles.css">
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    .voucher-card { background: white; border-radius: 1rem; padding: 1.5rem; border-left: 8px solid var(--primary); display: flex; align-items: center; gap: 2rem; margin-bottom: 2rem; }
+    .qrcode-container { background: white; padding: 0.5rem; border-radius: 0.5rem; border: 1px solid #eee; }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script type="text/babel">
+    const { useState, useEffect } = React;
+
+    function QRCode({ value }) {
+      const containerRef = React.useRef(null);
+      useEffect(() => {
+        if (containerRef.current) {
+          containerRef.current.innerHTML = '';
+          new QRCode(containerRef.current, {
+            text: value,
+            width: 128,
+            height: 128
+          });
+        }
+      }, [value]);
+      return <div ref={containerRef} className="qrcode-container"></div>;
+    }
+
+    function VouchersPage() {
+      const [vouchers, setVouchers] = useState([]);
+      const [loading, setLoading] = useState(true);
+
+      useEffect(() => {
+        const fetchVouchers = async () => {
+          try {
+            const token = localStorage.getItem('token');
+            const response = await fetch('http://localhost:8000/citizen/vouchers', {
+              headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+              const data = await response.json();
+              setVouchers(data);
+            }
+          } catch (err) {
+            console.error(err);
+          } finally {
+            setLoading(false);
+          }
+        };
+        fetchVouchers();
+      }, []);
+
+      return (
+        <div>
+           <header>
+            <div className="logo" onClick={() => window.location.href='dashboard.html'} style={{ cursor: 'pointer' }}>
+               <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+               Civic Connect
+            </div>
+            <nav style={{ display: 'flex', gap: '1.5rem', alignItems: 'center' }}>
+              <a href="dashboard.html" style={{ color: 'var(--text-light)', textDecoration: 'none' }}>Dashboard</a>
+              <a href="rewards.html" style={{ color: 'var(--text-light)', textDecoration: 'none' }}>Store</a>
+              <a href="vouchers.html" style={{ fontWeight: '600', color: 'var(--primary)', textDecoration: 'none' }}>Vouchers</a>
+            </nav>
+          </header>
+
+          <main className="container animate-fade">
+             <div style={{ marginBottom: '2rem' }}>
+                <h1>My Vouchers</h1>
+                <p style={{ color: 'var(--text-light)' }}>Scan these QR codes when boarding public transport.</p>
+             </div>
+
+             {loading ? (
+               <p>Loading your vouchers...</p>
+             ) : vouchers.length === 0 ? (
+               <div className="card" style={{ textAlign: 'center', padding: '4rem' }}>
+                  <h3>You don't have any active vouchers.</h3>
+                  <p style={{ margin: '1rem 0 2rem' }}>Redeem your points in the store to get bus passes!</p>
+                  <a href="rewards.html" className="btn btn-primary">Go to Rewards Store</a>
+               </div>
+             ) : (
+               <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+                  {vouchers.map(v => (
+                      <div key={v.id} className="voucher-card animate-fade shadow">
+                         <QRCode value={v.qr_code} />
+                         <div>
+                            <div className="status-badge" style={{ background: '#dbeafe', color: 'var(--primary)', display: 'inline-block', marginBottom: '0.5rem' }}>
+                                {v.type === 'bus_1day' ? '1-DAY BUS PASS' : '7-DAY BUS PASS'}
+                            </div>
+                            <h2 style={{ fontSize: '1.25rem', marginBottom: '0.5rem' }}>Valid Citywide</h2>
+                            <p style={{ fontSize: '0.8rem', color: 'var(--text-light)' }}>
+                                Expires: {new Date(v.expires_at).toLocaleString()}
+                                <br/>
+                                <span style={{ color: 'var(--success)', fontWeight: 'bold' }}>Status: {v.status.toUpperCase()}</span>
+                            </p>
+                         </div>
+                      </div>
+                  ))}
+               </div>
+             )}
+          </main>
+        </div>
+      );
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<VouchersPage />);
+  </script>
+</body>
+</html>
